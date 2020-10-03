@@ -1,0 +1,8 @@
+[package]
+name = "geoip2"
+version = "0.1.0"
+authors = ["IncSW <dev@incsw.in>"]
+edition = "2018"
+
+[dependencies]
+maxminddb = "0.15"
