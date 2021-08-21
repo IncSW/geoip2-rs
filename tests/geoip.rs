@@ -1,5 +1,3 @@
-#![feature(test)]
-
 #[cfg(test)]
 mod tests {
     use geoip2::{AnonymousIP, City, ConnectionType, Country, Domain, Error, Reader, ASN, ISP};
