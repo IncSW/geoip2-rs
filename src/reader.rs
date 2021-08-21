@@ -134,7 +134,7 @@ impl<'a, T> Reader<'a, T> {
         }
     }
 
-    pub fn lookup_pointer(&self, address: IpAddr) -> Result<usize, Error> {
+    fn lookup_pointer(&self, address: IpAddr) -> Result<usize, Error> {
         let ip_bytes = match address {
             IpAddr::V4(ip) => ip.octets().to_vec(),
             IpAddr::V6(ip) => {
@@ -151,7 +151,7 @@ impl<'a, T> Reader<'a, T> {
         Ok(pointer)
     }
 
-    pub fn get_offset(&self, address: IpAddr) -> Result<usize, Error> {
+    fn get_offset(&self, address: IpAddr) -> Result<usize, Error> {
         let pointer = self.lookup_pointer(address)?;
         let offset = pointer - self.metadata.node_count as usize - DATA_SECTION_SEPARATOR_SIZE;
         if offset >= self.decoder_buffer.len() {
