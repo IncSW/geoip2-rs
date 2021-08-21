@@ -29,7 +29,7 @@ impl<'a, T> Reader<'a, T> {
             None => return Err(Error::InvalidMetadata),
         };
         let mut metadata = Metadata::default();
-        metadata.from_bytes(&buffer, &mut metadata_start)?;
+        metadata.from_bytes(buffer, &mut metadata_start)?;
         if metadata.record_size != 24 && metadata.record_size != 28 && metadata.record_size != 32 {
             return Err(Error::InvalidRecordSize(metadata.record_size));
         }

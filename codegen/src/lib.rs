@@ -73,8 +73,8 @@ pub fn derive_decoder(input: TokenStream) -> TokenStream {
                                 },
                                 "Vec" => match &segment.arguments {
                                     PathArguments::AngleBracketed(p) => match &p.args[0] {
-                                        GenericArgument::Type(ty) => match ty {
-                                            syn::Type::Reference(p) => match p.elem.as_ref() {
+                                        GenericArgument::Type(syn::Type::Reference(p)) => {
+                                            match p.elem.as_ref() {
                                                 syn::Type::Path(p) => {
                                                     let segment = &p.path.segments[0];
                                                     match segment.ident.to_string().as_ref() {
@@ -85,9 +85,8 @@ pub fn derive_decoder(input: TokenStream) -> TokenStream {
                                                     }
                                                 }
                                                 _ => unimplemented!(),
-                                            },
-                                            _ => unimplemented!(),
-                                        },
+                                            }
+                                        }
                                         _ => unimplemented!(),
                                     },
                                     _ => unimplemented!(),
@@ -228,55 +227,53 @@ pub fn reader(metadata: TokenStream, input: TokenStream) -> TokenStream {
                                             "Vec" => match &segment.arguments {
                                                 PathArguments::AngleBracketed(p) => {
                                                     match &p.args[0] {
-                                                        GenericArgument::Type(ty) => match ty {
-                                                            syn::Type::Path(p) => {
-                                                                let segment = &p.path.segments[0];
-                                                                let ident = &segment.ident;
-                                                                match ident.to_string().as_ref() {
-                                                                    "models" => {
-                                                                        let ident =
-                                                                            &p.path.segments[1]
-                                                                                .ident;
-                                                                        quote! {
-                                                                            #name => {
-                                                                                let (data_type, size) = read_control(self.decoder_buffer, &mut offset)?;
-                                                                                result.#name_ident = Some(match data_type {
-                                                                                    DATA_TYPE_SLICE => {
-                                                                                        let mut array: Vec<models::#ident<'a>> = Vec::with_capacity(size);
-                                                                                        for _i in 0..size {
-                                                                                            let mut model = models::#ident::default();
-                                                                                            model.from_bytes(self.decoder_buffer, &mut offset)?;
-                                                                                            array.push(model);
-                                                                                        }
-                                                                                        array
+                                                        GenericArgument::Type(syn::Type::Path(
+                                                            p,
+                                                        )) => {
+                                                            let segment = &p.path.segments[0];
+                                                            let ident = &segment.ident;
+                                                            match ident.to_string().as_ref() {
+                                                                "models" => {
+                                                                    let ident =
+                                                                        &p.path.segments[1].ident;
+                                                                    quote! {
+                                                                        #name => {
+                                                                            let (data_type, size) = read_control(self.decoder_buffer, &mut offset)?;
+                                                                            result.#name_ident = Some(match data_type {
+                                                                                DATA_TYPE_SLICE => {
+                                                                                    let mut array: Vec<models::#ident<'a>> = Vec::with_capacity(size);
+                                                                                    for _i in 0..size {
+                                                                                        let mut model = models::#ident::default();
+                                                                                        model.from_bytes(self.decoder_buffer, &mut offset)?;
+                                                                                        array.push(model);
                                                                                     }
-                                                                                    DATA_TYPE_POINTER => {
-                                                                                        let mut offset = read_pointer(self.decoder_buffer, &mut offset, size)?;
-                                                                                        let (data_type, size) = read_control(self.decoder_buffer, &mut offset)?;
-                                                                                        match data_type {
-                                                                                            DATA_TYPE_SLICE => {
-                                                                                                let mut array: Vec<models::#ident<'a>> =
-                                                                                                    Vec::with_capacity(size);
-                                                                                                for _ in 0..size {
-                                                                                                    let mut model = models::#ident::default();
-                                                                                                    model.from_bytes(self.decoder_buffer, &mut offset)?;
-                                                                                                    array.push(model);
-                                                                                                }
-                                                                                                array
+                                                                                    array
+                                                                                }
+                                                                                DATA_TYPE_POINTER => {
+                                                                                    let mut offset = read_pointer(self.decoder_buffer, &mut offset, size)?;
+                                                                                    let (data_type, size) = read_control(self.decoder_buffer, &mut offset)?;
+                                                                                    match data_type {
+                                                                                        DATA_TYPE_SLICE => {
+                                                                                            let mut array: Vec<models::#ident<'a>> =
+                                                                                                Vec::with_capacity(size);
+                                                                                            for _ in 0..size {
+                                                                                                let mut model = models::#ident::default();
+                                                                                                model.from_bytes(self.decoder_buffer, &mut offset)?;
+                                                                                                array.push(model);
                                                                                             }
-                                                                                            _ => return Err(Error::InvalidDataType(data_type)),
+                                                                                            array
                                                                                         }
+                                                                                        _ => return Err(Error::InvalidDataType(data_type)),
                                                                                     }
-                                                                                    _ => return Err(Error::InvalidDataType(data_type)),
-                                                                                })
-                                                                            }
+                                                                                }
+                                                                                _ => return Err(Error::InvalidDataType(data_type)),
+                                                                            })
                                                                         }
                                                                     }
-                                                                    _ => unreachable!(),
                                                                 }
+                                                                _ => unreachable!(),
                                                             }
-                                                            _ => unreachable!(),
-                                                        },
+                                                        }
                                                         _ => unreachable!(),
                                                     }
                                                 }

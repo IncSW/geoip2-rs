@@ -37,6 +37,6 @@ impl<'a> Metadata<'a> {
                 return Some(i + 14);
             }
         }
-        return None;
+        None
     }
 }
