@@ -1,8 +1,38 @@
 [package]
 name = "geoip2"
-version = "0.1.0"
+version = "0.0.1"
 authors = ["IncSW <dev@incsw.in>"]
+description = "Library for reading MaxMind DB format used by GeoIP2 and GeoLite2"
+readme = "README.md"
+keywords = ["MaxMind", "GeoIP2", "GeoIP", "geolocation", "ip"]
+categories = ["database", "network-programming"]
+homepage = "https://github.com/IncSW/geoip2-rs"
+documentation = "https://docs.rs/geoip2"
+repository = "https://github.com/IncSW/geoip2-rs"
+license = "MIT"
 edition = "2018"
+exclude = ["testdata"]
 
 [dependencies]
-maxminddb = "0.15"
+geoip2-codegen = "0.0.1"
+
+[workspace]
+members = [".", "codegen"]
+
+[patch.crates-io]
+geoip2-codegen = { path = "codegen" }
+
+[dev-dependencies]
+maxminddb = "0.21.0"
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+opt-level = 3
+panic = "abort"
+
+[[test]]
+name = "geoip"
+
+[[bench]]
+name = "geoip"

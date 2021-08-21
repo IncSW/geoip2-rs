@@ -24,26 +24,14 @@ pub(crate) fn read_bytes<'a>(
 ) -> Result<&'a [u8], Error> {
     let new_offset = *offset + size;
     if new_offset > buffer.len() {
-        return dbg!(Err(Error::InvalidOffset));
+        return Err(Error::InvalidOffset);
     }
     let bytes = &buffer[*offset..new_offset];
     *offset = new_offset;
     Ok(bytes)
 }
 
-pub(crate) fn skip_bytes<'a>(
-    buffer: &'a [u8],
-    offset: &mut usize,
-    size: usize,
-) -> Result<(), Error> {
-    let new_offset = *offset + size;
-    if new_offset > buffer.len() {
-        return dbg!(Err(Error::InvalidOffset));
-    }
-    *offset = new_offset;
-    Ok(())
-}
-
+#[inline]
 pub(crate) fn read_control<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<(u8, usize), Error> {
     let control_byte = buffer[*offset];
     *offset += 1;
@@ -96,10 +84,10 @@ pub(crate) fn read_usize<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<usi
             match data_type {
                 DATA_TYPE_UINT16 | DATA_TYPE_UINT32 | DATA_TYPE_INT32 | DATA_TYPE_UINT64
                 | DATA_TYPE_UINT128 => Ok(bytes_to_usize(read_bytes(buffer, &mut offset, size)?)),
-                _ => return dbg!(Err(Error::InvalidDataType(data_type))),
+                _ => return Err(Error::InvalidDataType(data_type)),
             }
         }
-        _ => return dbg!(Err(Error::InvalidDataType(data_type))),
+        _ => return Err(Error::InvalidDataType(data_type)),
     }
 }
 
@@ -112,10 +100,10 @@ pub(crate) fn read_bool<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<bool
             let (data_type, size) = read_control(buffer, &mut offset)?;
             match data_type {
                 DATA_TYPE_BOOL => Ok(size != 0),
-                _ => return dbg!(Err(Error::InvalidDataType(data_type))),
+                _ => return Err(Error::InvalidDataType(data_type)),
             }
         }
-        _ => return dbg!(Err(Error::InvalidDataType(data_type))),
+        _ => return Err(Error::InvalidDataType(data_type)),
     }
 }
 
@@ -134,10 +122,10 @@ pub(crate) fn read_f64<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<f64, 
                         bytes_to_usize(read_bytes(buffer, &mut offset, size)?) as u64,
                     ))
                 }
-                _ => return dbg!(Err(Error::InvalidDataType(data_type))),
+                _ => return Err(Error::InvalidDataType(data_type)),
             }
         }
-        _ => return dbg!(Err(Error::InvalidDataType(data_type))),
+        _ => return Err(Error::InvalidDataType(data_type)),
     }
 }
 
@@ -154,34 +142,28 @@ pub(crate) fn read_str<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<&'a s
                 DATA_TYPE_STRING => Ok(unsafe {
                     std::str::from_utf8_unchecked(read_bytes(buffer, &mut offset, size)?)
                 }),
-                _ => return dbg!(Err(Error::InvalidDataType(data_type))),
+                _ => return Err(Error::InvalidDataType(data_type)),
             }
         }
-        _ => return dbg!(Err(Error::InvalidDataType(data_type))),
+        _ => return Err(Error::InvalidDataType(data_type)),
     }
 }
 
-pub(crate) fn skip_str<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<(), Error> {
-    let (data_type, size) = read_control(buffer, offset)?;
-    match data_type {
-        DATA_TYPE_STRING => skip_bytes(buffer, offset, size),
-        DATA_TYPE_POINTER => {
-            let mut offset = read_pointer(buffer, offset, size)?;
-            let (data_type, size) = read_control(buffer, &mut offset)?;
-            match data_type {
-                DATA_TYPE_STRING => skip_bytes(buffer, &mut offset, size),
-                _ => return dbg!(Err(Error::InvalidDataType(data_type))),
+#[derive(Default, Debug)]
+pub struct Map<'a>(Vec<(&'a str, &'a str)>);
+
+impl<'a> Map<'a> {
+    pub fn get(&self, key: &'a str) -> Option<&'a str> {
+        for tp in self.0.iter() {
+            if tp.0 == key {
+                return Some(tp.1);
             }
         }
-        _ => return dbg!(Err(Error::InvalidDataType(data_type))),
+        None
     }
 }
 
-/*
-pub(crate) fn read_map<'a>(
-    buffer: &'a [u8],
-    offset: &mut usize,
-) -> Result<Vec<(&'a str, &'a str)>, Error> {
+pub(crate) fn read_map<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<Map<'a>, Error> {
     let (data_type, size) = read_control(buffer, offset)?;
     match data_type {
         DATA_TYPE_MAP => {
@@ -189,7 +171,7 @@ pub(crate) fn read_map<'a>(
             for _ in 0..size {
                 map.push((read_str(buffer, offset)?, read_str(buffer, offset)?));
             }
-            Ok(map)
+            Ok(Map(map))
         }
         DATA_TYPE_POINTER => {
             let mut offset = read_pointer(buffer, offset, size)?;
@@ -203,62 +185,13 @@ pub(crate) fn read_map<'a>(
                             read_str(buffer, &mut offset)?,
                         ));
                     }
-                    Ok(map)
+                    Ok(Map(map))
                 }
-                _ => return dbg!(Err(Error::InvalidDataType(data_type))),
+                _ => return Err(Error::InvalidDataType(data_type)),
             }
         }
-        _ => return dbg!(Err(Error::InvalidDataType(data_type))),
+        _ => return Err(Error::InvalidDataType(data_type)),
     }
-}
-*/
-
-pub(crate) fn read_translation_from_map<'a>(
-    buffer: &'a [u8],
-    offset: &mut usize,
-    locale: &str,
-) -> Result<Option<&'a str>, Error> {
-    let mut translation: Option<&'a str> = None;
-    let (data_type, size) = read_control(buffer, offset)?;
-    match data_type {
-        DATA_TYPE_MAP => {
-            for _ in 0..size {
-                if translation != None {
-                    skip_str(buffer, offset)?;
-                    skip_str(buffer, offset)?;
-                    continue;
-                }
-                if locale == read_str(buffer, offset)? {
-                    translation = Some(read_str(buffer, offset)?)
-                } else {
-                    skip_str(buffer, offset)?;
-                }
-            }
-        }
-        DATA_TYPE_POINTER => {
-            let mut offset = read_pointer(buffer, offset, size)?;
-            let (data_type, size) = read_control(buffer, &mut offset)?;
-            match data_type {
-                DATA_TYPE_MAP => {
-                    for _ in 0..size {
-                        if translation != None {
-                            skip_str(buffer, &mut offset)?;
-                            skip_str(buffer, &mut offset)?;
-                            continue;
-                        }
-                        if locale == read_str(buffer, &mut offset)? {
-                            translation = Some(read_str(buffer, &mut offset)?)
-                        } else {
-                            skip_str(buffer, &mut offset)?;
-                        }
-                    }
-                }
-                _ => return dbg!(Err(Error::InvalidDataType(data_type))),
-            }
-        }
-        _ => return dbg!(Err(Error::InvalidDataType(data_type))),
-    };
-    return Ok(translation);
 }
 
 pub(crate) fn read_array<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<Vec<&'a str>, Error> {
@@ -282,10 +215,10 @@ pub(crate) fn read_array<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<Vec
                     }
                     Ok(array)
                 }
-                _ => return dbg!(Err(Error::InvalidDataType(data_type))),
+                _ => return Err(Error::InvalidDataType(data_type)),
             }
         }
-        _ => return dbg!(Err(Error::InvalidDataType(data_type))),
+        _ => return Err(Error::InvalidDataType(data_type)),
     }
 }
 

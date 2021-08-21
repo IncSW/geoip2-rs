@@ -1,10 +1,14 @@
 use std::marker::PhantomData;
 use std::net::IpAddr;
 
-use crate::decoder::*;
+use crate::decoder::{
+    read_bool, read_control, read_pointer, read_str, read_usize, DATA_TYPE_MAP, DATA_TYPE_POINTER,
+    DATA_TYPE_SLICE,
+};
 use crate::errors::Error;
 use crate::metadata::Metadata;
 use crate::models;
+use geoip2_codegen::reader;
 
 const DATA_SECTION_SEPARATOR_SIZE: usize = 16;
 
@@ -20,11 +24,12 @@ pub struct Reader<'a, T> {
 
 impl<'a, T> Reader<'a, T> {
     fn from_bytes_raw(buffer: &'a [u8]) -> Result<Reader<'a, T>, Error> {
-        let metadata_start = match Metadata::find_start(buffer) {
+        let mut metadata_start = match Metadata::find_start(buffer) {
             Some(index) => index,
             None => return Err(Error::InvalidMetadata),
         };
-        let metadata = Metadata::from_bytes(&buffer[metadata_start..])?;
+        let mut metadata = Metadata::default();
+        metadata.from_bytes(&buffer, &mut metadata_start)?;
         if metadata.record_size != 24 && metadata.record_size != 28 && metadata.record_size != 32 {
             return Err(Error::InvalidRecordSize(metadata.record_size));
         }
@@ -36,10 +41,10 @@ impl<'a, T> Reader<'a, T> {
         }
         let mut reader = Reader {
             t: PhantomData,
-            metadata: metadata,
+            metadata,
             decoder_buffer: &buffer[data_section_start..metadata_start],
             node_buffer: &buffer[..search_tree_size],
-            node_offset_mult: node_offset_mult,
+            node_offset_mult,
             ip_v4_start: 0,
             ip_v4_start_bit_depth: 0,
         };
@@ -156,6 +161,7 @@ impl<'a, T> Reader<'a, T> {
     }
 }
 
+#[reader("GeoIP2-Country", "GeoLite2-Country")]
 #[derive(Default, Debug)]
 pub struct Country<'a> {
     pub continent: Option<models::Continent<'a>>,
@@ -165,60 +171,7 @@ pub struct Country<'a> {
     pub traits: Option<models::Traits<'a>>,
 }
 
-impl<'a> Reader<'a, Country<'a>> {
-    pub fn from_bytes(buffer: &[u8]) -> Result<Reader<Country>, Error> {
-        let reader = Reader::from_bytes_raw(buffer)?;
-        if reader.metadata.database_type != "GeoIP2-Country"
-            && reader.metadata.database_type != "GeoLite2-Country"
-        {
-            return Err(Error::InvalidDatabaseType(
-                reader.metadata.database_type.into(),
-            ));
-        }
-        Ok(reader)
-    }
-
-    pub fn lookup(&self, address: IpAddr) -> Result<Country, Error> {
-        let mut offset = self.get_offset(address)?;
-        let (data_type, size) = read_control(self.decoder_buffer, &mut offset)?;
-        if data_type != DATA_TYPE_MAP {
-            return dbg!(Err(Error::InvalidDataType(data_type)));
-        }
-        let mut result = Country::default();
-        for _ in 0..size {
-            match read_str(self.decoder_buffer, &mut offset)? {
-                "continent" => {
-                    let mut model = models::Continent::default();
-                    model.from_bytes(self.decoder_buffer, &mut offset)?;
-                    result.continent = Some(model);
-                }
-                "country" => {
-                    let mut model = models::Country::default();
-                    model.from_bytes(self.decoder_buffer, &mut offset)?;
-                    result.country = Some(model);
-                }
-                "registered_country" => {
-                    let mut model = models::Country::default();
-                    model.from_bytes(self.decoder_buffer, &mut offset)?;
-                    result.registered_country = Some(model);
-                }
-                "represented_country" => {
-                    let mut model = models::Country::default();
-                    model.from_bytes(self.decoder_buffer, &mut offset)?;
-                    result.represented_country = Some(model);
-                }
-                "traits" => {
-                    let mut model = models::Traits::default();
-                    model.from_bytes(self.decoder_buffer, &mut offset)?;
-                    result.traits = Some(model);
-                }
-                field => return Err(Error::UnknownField(field.into())),
-            }
-        }
-        Ok(result)
-    }
-}
-
+#[reader("GeoIP2-City", "GeoLite2-City", "GeoIP2-Enterprise")]
 #[derive(Default, Debug)]
 pub struct City<'a> {
     pub continent: Option<models::Continent<'a>>,
@@ -234,108 +187,7 @@ pub struct City<'a> {
 
 pub type Enterprise<'a> = City<'a>;
 
-impl<'a> Reader<'a, City<'a>> {
-    pub fn from_bytes(buffer: &[u8]) -> Result<Reader<City>, Error> {
-        let reader = Reader::from_bytes_raw(buffer)?;
-        if reader.metadata.database_type != "GeoIP2-City"
-            && reader.metadata.database_type != "GeoLite2-City"
-            && reader.metadata.database_type != "GeoIP2-Enterprise"
-        {
-            return Err(Error::InvalidDatabaseType(
-                reader.metadata.database_type.into(),
-            ));
-        }
-        Ok(reader)
-    }
-
-    pub fn lookup(&self, address: IpAddr) -> Result<City, Error> {
-        let mut offset = self.get_offset(address)?;
-        let (data_type, size) = read_control(self.decoder_buffer, &mut offset)?;
-        if data_type != DATA_TYPE_MAP {
-            return dbg!(Err(Error::InvalidDataType(data_type)));
-        }
-        let mut result = City::default();
-        for _ in 0..size {
-            match read_str(self.decoder_buffer, &mut offset)? {
-                "continent" => {
-                    let mut model = models::Continent::default();
-                    model.from_bytes(self.decoder_buffer, &mut offset)?;
-                    result.continent = Some(model);
-                }
-                "country" => {
-                    let mut model = models::Country::default();
-                    model.from_bytes(self.decoder_buffer, &mut offset)?;
-                    result.country = Some(model);
-                }
-                "registered_country" => {
-                    let mut model = models::Country::default();
-                    model.from_bytes(self.decoder_buffer, &mut offset)?;
-                    result.registered_country = Some(model);
-                }
-                "represented_country" => {
-                    let mut model = models::Country::default();
-                    model.from_bytes(self.decoder_buffer, &mut offset)?;
-                    result.represented_country = Some(model);
-                }
-                "city" => {
-                    let mut model = models::City::default();
-                    model.from_bytes(self.decoder_buffer, &mut offset)?;
-                    result.city = Some(model);
-                }
-                "location" => {
-                    let mut model = models::Location::default();
-                    model.from_bytes(self.decoder_buffer, &mut offset)?;
-                    result.location = Some(model);
-                }
-                "postal" => {
-                    let mut model = models::Postal::default();
-                    model.from_bytes(self.decoder_buffer, &mut offset)?;
-                    result.postal = Some(model);
-                }
-                "subdivisions" => {
-                    let (data_type, size) = read_control(self.decoder_buffer, &mut offset)?;
-                    result.subdivisions = Some(match data_type {
-                        DATA_TYPE_SLICE => {
-                            let mut array: Vec<models::Subdivision<'a>> = Vec::with_capacity(size);
-                            for _ in 0..size {
-                                let mut model = models::Subdivision::default();
-                                model.from_bytes(self.decoder_buffer, &mut offset)?;
-                                array.push(model);
-                            }
-                            array
-                        }
-                        DATA_TYPE_POINTER => {
-                            let mut offset = read_pointer(self.decoder_buffer, &mut offset, size)?;
-                            let (data_type, size) = read_control(self.decoder_buffer, &mut offset)?;
-                            match data_type {
-                                DATA_TYPE_SLICE => {
-                                    let mut array: Vec<models::Subdivision<'a>> =
-                                        Vec::with_capacity(size);
-                                    for _ in 0..size {
-                                        let mut model = models::Subdivision::default();
-                                        model.from_bytes(self.decoder_buffer, &mut offset)?;
-                                        array.push(model);
-                                    }
-                                    array
-                                }
-                                _ => return dbg!(Err(Error::InvalidDataType(data_type))),
-                            }
-                        }
-                        _ => return dbg!(Err(Error::InvalidDataType(data_type))),
-                    })
-                }
-                "traits" => {
-                    let mut model = models::Traits::default();
-                    model.from_bytes(self.decoder_buffer, &mut offset)?;
-                    result.traits = Some(model);
-                }
-                field => return Err(Error::UnknownField(field.into())),
-            }
-        }
-        Ok(result)
-    }
-}
-
+#[reader("GeoIP2-ISP")]
 #[derive(Default, Debug)]
 pub struct ISP<'a> {
     pub autonomous_system_number: u32,
@@ -344,80 +196,13 @@ pub struct ISP<'a> {
     pub organization: Option<&'a str>,
 }
 
-impl<'a> Reader<'a, ISP<'a>> {
-    pub fn from_bytes(buffer: &[u8]) -> Result<Reader<ISP>, Error> {
-        let reader = Reader::from_bytes_raw(buffer)?;
-        if reader.metadata.database_type != "GeoIP2-ISP" {
-            return Err(Error::InvalidDatabaseType(
-                reader.metadata.database_type.into(),
-            ));
-        }
-        Ok(reader)
-    }
-
-    pub fn lookup(&self, address: IpAddr) -> Result<ISP, Error> {
-        let mut offset = self.get_offset(address)?;
-        let (data_type, size) = read_control(self.decoder_buffer, &mut offset)?;
-        if data_type != DATA_TYPE_MAP {
-            return dbg!(Err(Error::InvalidDataType(data_type)));
-        }
-        let mut result = ISP::default();
-        for _ in 0..size {
-            match read_str(self.decoder_buffer, &mut offset)? {
-                "autonomous_system_number" => {
-                    result.autonomous_system_number =
-                        read_usize(self.decoder_buffer, &mut offset)? as u32
-                }
-                "autonomous_system_organization" => {
-                    result.autonomous_system_organization =
-                        Some(read_str(self.decoder_buffer, &mut offset)?)
-                }
-                "isp" => result.isp = Some(read_str(self.decoder_buffer, &mut offset)?),
-                "organization" => {
-                    result.organization = Some(read_str(self.decoder_buffer, &mut offset)?)
-                }
-                field => return Err(Error::UnknownField(field.into())),
-            }
-        }
-        Ok(result)
-    }
-}
-
+#[reader("GeoIP2-Connection-Type")]
 #[derive(Default, Debug)]
 pub struct ConnectionType<'a> {
     pub connection_type: Option<&'a str>,
 }
 
-impl<'a> Reader<'a, ConnectionType<'a>> {
-    pub fn from_bytes(buffer: &[u8]) -> Result<Reader<ConnectionType>, Error> {
-        let reader = Reader::from_bytes_raw(buffer)?;
-        if reader.metadata.database_type != "GeoIP2-Connection-Type" {
-            return Err(Error::InvalidDatabaseType(
-                reader.metadata.database_type.into(),
-            ));
-        }
-        Ok(reader)
-    }
-
-    pub fn lookup(&self, address: IpAddr) -> Result<ConnectionType, Error> {
-        let mut offset = self.get_offset(address)?;
-        let (data_type, size) = read_control(self.decoder_buffer, &mut offset)?;
-        if data_type != DATA_TYPE_MAP {
-            return dbg!(Err(Error::InvalidDataType(data_type)));
-        }
-        let mut result = ConnectionType::default();
-        for _ in 0..size {
-            match read_str(self.decoder_buffer, &mut offset)? {
-                "connection_type" => {
-                    result.connection_type = Some(read_str(self.decoder_buffer, &mut offset)?)
-                }
-                field => return Err(Error::UnknownField(field.into())),
-            }
-        }
-        Ok(result)
-    }
-}
-
+#[reader("GeoIP2-Anonymous-IP")]
 #[derive(Default, Debug)]
 pub struct AnonymousIP {
     pub is_anonymous: bool,
@@ -425,87 +210,18 @@ pub struct AnonymousIP {
     pub is_hosting_provider: bool,
     pub is_public_proxy: bool,
     pub is_tor_exit_node: bool,
+    pub is_residential_proxy: bool,
 }
 
-impl<'a> Reader<'a, AnonymousIP> {
-    pub fn from_bytes(buffer: &[u8]) -> Result<Reader<AnonymousIP>, Error> {
-        let reader = Reader::from_bytes_raw(buffer)?;
-        if reader.metadata.database_type != "GeoIP2-Anonymous-IP" {
-            return Err(Error::InvalidDatabaseType(
-                reader.metadata.database_type.into(),
-            ));
-        }
-        Ok(reader)
-    }
-
-    pub fn lookup(&self, address: IpAddr) -> Result<AnonymousIP, Error> {
-        let mut offset = self.get_offset(address)?;
-        let (data_type, size) = read_control(self.decoder_buffer, &mut offset)?;
-        if data_type != DATA_TYPE_MAP {
-            return dbg!(Err(Error::InvalidDataType(data_type)));
-        }
-        let mut result = AnonymousIP::default();
-        for _ in 0..size {
-            match read_str(self.decoder_buffer, &mut offset)? {
-                "is_anonymous" => {
-                    result.is_anonymous = read_bool(self.decoder_buffer, &mut offset)?
-                }
-                "is_anonymous_vpn" => {
-                    result.is_anonymous_vpn = read_bool(self.decoder_buffer, &mut offset)?
-                }
-                "is_hosting_provider" => {
-                    result.is_hosting_provider = read_bool(self.decoder_buffer, &mut offset)?
-                }
-                "is_public_proxy" => {
-                    result.is_public_proxy = read_bool(self.decoder_buffer, &mut offset)?
-                }
-                "is_tor_exit_node" => {
-                    result.is_tor_exit_node = read_bool(self.decoder_buffer, &mut offset)?
-                }
-                field => return Err(Error::UnknownField(field.into())),
-            }
-        }
-        Ok(result)
-    }
-}
-
+#[reader("GeoLite2-ASN")]
 #[derive(Default, Debug)]
 pub struct ASN<'a> {
     pub autonomous_system_number: u32,
     pub autonomous_system_organization: Option<&'a str>,
 }
 
-impl<'a> Reader<'a, ASN<'a>> {
-    pub fn from_bytes(buffer: &[u8]) -> Result<Reader<ASN>, Error> {
-        let reader = Reader::from_bytes_raw(buffer)?;
-        if reader.metadata.database_type != "GeoLite2-ASN" {
-            return Err(Error::InvalidDatabaseType(
-                reader.metadata.database_type.into(),
-            ));
-        }
-        Ok(reader)
-    }
-
-    pub fn lookup(&self, address: IpAddr) -> Result<ASN, Error> {
-        let mut offset = self.get_offset(address)?;
-        let (data_type, size) = read_control(self.decoder_buffer, &mut offset)?;
-        if data_type != DATA_TYPE_MAP {
-            return dbg!(Err(Error::InvalidDataType(data_type)));
-        }
-        let mut result = ASN::default();
-        for _ in 0..size {
-            match read_str(self.decoder_buffer, &mut offset)? {
-                "autonomous_system_number" => {
-                    result.autonomous_system_number =
-                        read_usize(self.decoder_buffer, &mut offset)? as u32
-                }
-                "autonomous_system_organization" => {
-                    result.autonomous_system_organization =
-                        Some(read_str(self.decoder_buffer, &mut offset)?)
-                }
-                field => return Err(Error::UnknownField(field.into())),
-            }
-        }
-        Ok(result)
-    }
+#[reader("GeoIP2-Domain")]
+#[derive(Default, Debug)]
+pub struct Domain<'a> {
+    pub domain: Option<&'a str>,
 }
