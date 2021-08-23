@@ -1,5 +1,4 @@
 use proc_macro::{self, TokenStream};
-use proc_macro2;
 use quote::quote;
 use syn::{
     parse_macro_input, AttributeArgs, DeriveInput, Fields, FieldsNamed, GenericArgument, Ident,
@@ -256,7 +255,7 @@ pub fn reader(metadata: TokenStream, input: TokenStream) -> TokenStream {
             if let NestedMeta::Lit(Lit::Str(lit)) = item {
                 lit.clone()
             } else {
-                unimplemented!("{:#?}", item);
+                unimplemented!("{:?}", item);
             }
         })
         .collect::<Vec<LitStr>>();
