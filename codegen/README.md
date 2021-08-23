@@ -1,5 +1,5 @@
 [![crates.io](https://img.shields.io/crates/v/geoip2-codegen?label=latest)](https://crates.io/crates/geoip2-codegen)
-[![Documentation](https://docs.rs/geoip2-codegen/badge.svg?version=0.1.0)](https://docs.rs/geoip2-codegen/0.1.0)
+[![Documentation](https://docs.rs/geoip2-codegen/badge.svg?version=0.1.1)](https://docs.rs/geoip2-codegen/0.1.1)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
-[![Dependency Status](https://deps.rs/crate/geoip2-codegen/0.1.0/status.svg)](https://deps.rs/crate/geoip2-codegen/0.1.0)
+[![Dependency Status](https://deps.rs/crate/geoip2-codegen/0.1.1/status.svg)](https://deps.rs/crate/geoip2-codegen/0.1.1)
 ![downloads](https://img.shields.io/crates/d/geoip2-codegen.svg)

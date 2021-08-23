@@ -1,6 +1,6 @@
 [package]
 name = "geoip2-codegen"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["IncSW <dev@incsw.in>"]
 description = "geoip2 macros"
 readme = "README.md"
@@ -14,5 +14,6 @@ edition = "2018"
 proc-macro = true
 
 [dependencies]
-syn = { version = "1.0.74", features = ["full"] }
+syn = { version = "1.0.75", features = ["full", "extra-traits"] }
 quote = "1.0.9"
+proc-macro2 = "1.0.28"
