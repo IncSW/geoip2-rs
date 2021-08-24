@@ -302,32 +302,4 @@ mod tests {
             );
         }
     }
-
-    #[test]
-    fn test_realworld() {
-        {
-            let buffer = std::fs::read("./testdata/GeoIP2-City.mmdb").unwrap();
-            let reader = Reader::<City>::from_bytes(&buffer).unwrap();
-            let result = reader
-                .lookup(IpAddr::from_str("81.2.69.142").unwrap())
-                .unwrap();
-            eprintln!("{:#?}", result);
-        }
-        {
-            let buffer = std::fs::read("./testdata/GeoIP2-Connection-Type.mmdb").unwrap();
-            let reader = Reader::<ConnectionType>::from_bytes(&buffer).unwrap();
-            let result = reader
-                .lookup(IpAddr::from_str("81.2.69.142").unwrap())
-                .unwrap();
-            eprintln!("{:#?}", result);
-        }
-        {
-            let buffer = std::fs::read("./testdata/GeoIP2-ISP.mmdb").unwrap();
-            let reader = Reader::<ISP>::from_bytes(&buffer).unwrap();
-            let result = reader
-                .lookup(IpAddr::from_str("81.2.69.142").unwrap())
-                .unwrap();
-            eprintln!("{:#?}", result);
-        }
-    }
 }
