@@ -1,6 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use geoip2::{ASN, AnonymousIP, City, ConnectionType, Country, Domain, Enterprise, Error, ISP, Reader};
+    use geoip2::{
+        AnonymousIP, City, ConnectionType, Country, Domain, Enterprise, Error, Reader, ASN, ISP,
+    };
     use std::{net::IpAddr, str::FromStr};
 
     #[test]
