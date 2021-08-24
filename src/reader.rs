@@ -167,11 +167,11 @@ pub struct Country<'a> {
     pub continent: Option<models::Continent<'a>>,
     pub country: Option<models::Country<'a>>,
     pub registered_country: Option<models::Country<'a>>,
-    pub represented_country: Option<models::Country<'a>>,
-    pub traits: Option<models::Traits<'a>>,
+    pub represented_country: Option<models::RepresentedCountry<'a>>,
+    pub traits: Option<models::Traits>,
 }
 
-#[reader("GeoIP2-City", "GeoLite2-City", "GeoIP2-Enterprise")]
+#[reader("GeoIP2-City", "GeoLite2-City")]
 #[derive(Default, Debug)]
 pub struct City<'a> {
     pub continent: Option<models::Continent<'a>>,
@@ -181,16 +181,28 @@ pub struct City<'a> {
     pub location: Option<models::Location<'a>>,
     pub postal: Option<models::Postal<'a>>,
     pub registered_country: Option<models::Country<'a>>,
-    pub represented_country: Option<models::Country<'a>>,
-    pub traits: Option<models::Traits<'a>>,
+    pub represented_country: Option<models::RepresentedCountry<'a>>,
+    pub traits: Option<models::Traits>,
 }
 
-pub type Enterprise<'a> = City<'a>;
+#[reader("GeoIP2-Enterprise")]
+#[derive(Default, Debug)]
+pub struct Enterprise<'a> {
+    pub continent: Option<models::Continent<'a>>,
+    pub country: Option<models::EnterpriseCountry<'a>>,
+    pub subdivisions: Option<Vec<models::EnterpriseSubdivision<'a>>>,
+    pub city: Option<models::EnterpriseCity<'a>>,
+    pub location: Option<models::Location<'a>>,
+    pub postal: Option<models::EnterprisePostal<'a>>,
+    pub registered_country: Option<models::EnterpriseCountry<'a>>,
+    pub represented_country: Option<models::EnterpriseRepresentedCountry<'a>>,
+    pub traits: Option<models::EnterpriseTraits<'a>>,
+}
 
 #[reader("GeoIP2-ISP")]
 #[derive(Default, Debug)]
 pub struct ISP<'a> {
-    pub autonomous_system_number: u32,
+    pub autonomous_system_number: Option<u32>,
     pub autonomous_system_organization: Option<&'a str>,
     pub isp: Option<&'a str>,
     pub organization: Option<&'a str>,
@@ -205,18 +217,18 @@ pub struct ConnectionType<'a> {
 #[reader("GeoIP2-Anonymous-IP")]
 #[derive(Default, Debug)]
 pub struct AnonymousIP {
-    pub is_anonymous: bool,
-    pub is_anonymous_vpn: bool,
-    pub is_hosting_provider: bool,
-    pub is_public_proxy: bool,
-    pub is_tor_exit_node: bool,
-    pub is_residential_proxy: bool,
+    pub is_anonymous: Option<bool>,
+    pub is_anonymous_vpn: Option<bool>,
+    pub is_hosting_provider: Option<bool>,
+    pub is_public_proxy: Option<bool>,
+    pub is_tor_exit_node: Option<bool>,
+    pub is_residential_proxy: Option<bool>,
 }
 
 #[reader("GeoLite2-ASN")]
 #[derive(Default, Debug)]
 pub struct ASN<'a> {
-    pub autonomous_system_number: u32,
+    pub autonomous_system_number: Option<u32>,
     pub autonomous_system_organization: Option<&'a str>,
 }
 

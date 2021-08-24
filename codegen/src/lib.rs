@@ -145,12 +145,6 @@ fn extract_field(field_ident: Ident, ty: &Type) -> proc_macro2::TokenStream {
                 "u16" => quote! {
                     self.#field_ident = read_usize(buffer, offset)? as u16
                 },
-                "f64" => quote! {
-                    self.#field_ident = read_f64(buffer, offset)?
-                },
-                "bool" => quote! {
-                    self.#field_ident = read_bool(buffer, offset)?
-                },
                 "Map" => quote! {
                     self.#field_ident = read_map(buffer, offset)?
                 },
@@ -183,7 +177,10 @@ fn extract_fields(fields: &Fields) -> Vec<proc_macro2::TokenStream> {
     let mut result = Vec::new();
     for field in fields.iter() {
         let field_ident = field.ident.clone().unwrap();
-        let field_ident_value = format!("{}", field_ident);
+        let mut field_ident_value = format!("{}", field_ident);
+        if field_ident_value == "country_type" {
+            field_ident_value = "type".into();
+        }
         let field_stream = extract_field(field_ident, &field.ty);
         result.push(quote! {
             #field_ident_value => {
