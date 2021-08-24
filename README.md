@@ -28,7 +28,7 @@ See [examples/lookup.rs](examples/lookup.rs) for a basic example.
 
 Benchmarks required `nightly` Rust.
 
-Place `GeoIP2-Country.mmdb` and `GeoIP2-City.mmdb` in the `testdata` folder? then run:
+Place `GeoIP2-Country.mmdb` and `GeoIP2-City.mmdb` in the `testdata` folder, then run:
 ```
 cargo bench
 ```
