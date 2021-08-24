@@ -30,14 +30,14 @@ cargo 1.56.0-nightly, Intel i7-7700, Debian 9.1
 
 ### [IncSW/geoip2-rs](https://github.com/IncSW/geoip2-rs)
 ```
-city      1,189 ns/iter (+/- 73)
-country     553 ns/iter (+/- 43)
+city      1,139 ns/iter (+/- 47)
+country     549 ns/iter (+/- 20)
 ```
 
 ### [oschwald/maxminddb-rust](https://github.com/oschwald/maxminddb-rust)
 ```
 city      4,224 ns/iter (+/- 153)
-country   2,311 ns/iter (+/- 75)
+country   2,270 ns/iter (+/- 158)
 ```
 
 ## License
