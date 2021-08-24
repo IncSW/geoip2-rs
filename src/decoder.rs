@@ -125,6 +125,7 @@ pub(crate) fn read_f64(buffer: &[u8], offset: &mut usize) -> Result<f64, Error> 
     }
 }
 
+#[cfg(feature = "unsafe-str")]
 pub(crate) fn read_str<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<&'a str, Error> {
     let (data_type, size) = read_control(buffer, offset)?;
     match data_type {
@@ -138,6 +139,25 @@ pub(crate) fn read_str<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<&'a s
                 DATA_TYPE_STRING => Ok(unsafe {
                     std::str::from_utf8_unchecked(read_bytes(buffer, &mut offset, size)?)
                 }),
+                _ => Err(Error::InvalidDataType(data_type)),
+            }
+        }
+        _ => Err(Error::InvalidDataType(data_type)),
+    }
+}
+
+#[cfg(not(feature = "unsafe-str"))]
+pub(crate) fn read_str<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<&'a str, Error> {
+    let (data_type, size) = read_control(buffer, offset)?;
+    match data_type {
+        DATA_TYPE_STRING => Ok(std::str::from_utf8(read_bytes(buffer, offset, size)?)?),
+        DATA_TYPE_POINTER => {
+            let mut offset = read_pointer(buffer, offset, size)?;
+            let (data_type, size) = read_control(buffer, &mut offset)?;
+            match data_type {
+                DATA_TYPE_STRING => {
+                    Ok(std::str::from_utf8(read_bytes(buffer, &mut offset, size)?)?)
+                }
                 _ => Err(Error::InvalidDataType(data_type)),
             }
         }
