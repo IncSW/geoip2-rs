@@ -1,6 +1,6 @@
 [package]
 name = "geoip2-codegen"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["IncSW <dev@incsw.in>"]
 description = "geoip2 macros"
 readme = "README.md"

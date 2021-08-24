@@ -9,8 +9,8 @@
 ![Downloads](https://img.shields.io/crates/d/geoip2.svg)
 
 [![crates.io](https://img.shields.io/crates/v/geoip2?label=latest)](https://crates.io/crates/geoip2)
-[![Documentation](https://docs.rs/geoip2/badge.svg?version=0.1.1)](https://docs.rs/geoip2/0.1.1)
-[![Dependency Status](https://deps.rs/crate/geoip2/0.1.1/status.svg)](https://deps.rs/crate/geoip2/0.1.1)
+[![Documentation](https://docs.rs/geoip2/badge.svg?version=0.1.2)](https://docs.rs/geoip2/0.1.2)
+[![Dependency Status](https://deps.rs/crate/geoip2/0.1.2/status.svg)](https://deps.rs/crate/geoip2/0.1.2)
 
 
 </div>
@@ -19,7 +19,7 @@
 
 ```toml
 [dependencies]
-geoip2 = "0.1.1"
+geoip2 = "0.1.2"
 ```
 
 See [examples/lookup.rs](examples/lookup.rs) for a basic example.
