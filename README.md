@@ -24,9 +24,16 @@ geoip2 = "0.1.3"
 
 See [examples/lookup.rs](examples/lookup.rs) for a basic example.
 
-## Performance
+## Benchmarks
 
-cargo 1.56.0-nightly, Intel i7-7700, Debian 9.1
+Benchmarks required `nightly` Rust.
+
+Place `GeoIP2-Country.mmdb` and `GeoIP2-City.mmdb` in the `testdata` folder? then run:
+```
+cargo bench
+```
+
+Tested on paid DB on cargo 1.56.0-nightly, Intel i7-7700, Debian 9.1.
 
 ### [IncSW/geoip2-rs](https://github.com/IncSW/geoip2-rs)
 `default`
