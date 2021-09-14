@@ -161,7 +161,7 @@ impl<'a, T> Reader<'a, T> {
     }
 }
 
-#[reader("GeoIP2-Country", "GeoLite2-Country")]
+#[reader("GeoIP2-Country", "GeoLite2-Country", "DBIP-Country-Lite")]
 #[derive(Default, Debug)]
 pub struct Country<'a> {
     pub continent: Option<models::Continent<'a>>,
@@ -171,7 +171,7 @@ pub struct Country<'a> {
     pub traits: Option<models::Traits>,
 }
 
-#[reader("GeoIP2-City", "GeoLite2-City")]
+#[reader("GeoIP2-City", "GeoLite2-City", "DBIP-City-Lite")]
 #[derive(Default, Debug)]
 pub struct City<'a> {
     pub continent: Option<models::Continent<'a>>,
@@ -225,7 +225,7 @@ pub struct AnonymousIP {
     pub is_residential_proxy: Option<bool>,
 }
 
-#[reader("GeoLite2-ASN")]
+#[reader("GeoLite2-ASN", "DBIP-ASN-Lite", "DBIP-ASN-Lite (compat=GeoLite2-ASN)")]
 #[derive(Default, Debug)]
 pub struct ASN<'a> {
     pub autonomous_system_number: Option<u32>,
