@@ -65,15 +65,15 @@ fn extract_field(field_ident: Ident, ty: &Type) -> proc_macro2::TokenStream {
                                                                     array
                                                                 }
                                                                 DATA_TYPE_POINTER => {
-                                                                    let mut offset = read_pointer(buffer, offset, size)?;
-                                                                    let (data_type, size) = read_control(buffer, &mut offset)?;
+                                                                    let ref mut offset = read_pointer(buffer, offset, size)?;
+                                                                    let (data_type, size) = read_control(buffer, offset)?;
                                                                     match data_type {
                                                                         DATA_TYPE_SLICE => {
                                                                             let mut array: Vec<models::#ident<'a>> =
                                                                                 Vec::with_capacity(size);
                                                                             for _ in 0..size {
                                                                                 let mut model = models::#ident::default();
-                                                                                model.from_bytes(buffer, &mut offset)?;
+                                                                                model.from_bytes(buffer, offset)?;
                                                                                 array.push(model);
                                                                             }
                                                                             array
@@ -213,10 +213,10 @@ pub fn derive_decoder(input: TokenStream) -> TokenStream {
                 match data_type {
                     DATA_TYPE_MAP => self.from_bytes_map(buffer, offset, size),
                     DATA_TYPE_POINTER => {
-                        let mut offset = read_pointer(buffer, offset, size)?;
-                        let (data_type, size) = read_control(buffer, &mut offset)?;
+                        let ref mut offset = read_pointer(buffer, offset, size)?;
+                        let (data_type, size) = read_control(buffer, offset)?;
                         match data_type {
-                            DATA_TYPE_MAP => self.from_bytes_map(buffer, &mut offset, size),
+                            DATA_TYPE_MAP => self.from_bytes_map(buffer, offset, size),
                             _ => return Err(Error::InvalidDataType(data_type)),
                         }
                     }

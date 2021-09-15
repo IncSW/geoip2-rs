@@ -75,11 +75,11 @@ pub(crate) fn read_usize(buffer: &[u8], offset: &mut usize) -> Result<usize, Err
         DATA_TYPE_UINT16 | DATA_TYPE_UINT32 | DATA_TYPE_INT32 | DATA_TYPE_UINT64
         | DATA_TYPE_UINT128 => Ok(bytes_to_usize(read_bytes(buffer, offset, size)?)),
         DATA_TYPE_POINTER => {
-            let mut offset = read_pointer(buffer, offset, size)?;
-            let (data_type, size) = read_control(buffer, &mut offset)?;
+            let ref mut offset = read_pointer(buffer, offset, size)?;
+            let (data_type, size) = read_control(buffer, offset)?;
             match data_type {
                 DATA_TYPE_UINT16 | DATA_TYPE_UINT32 | DATA_TYPE_INT32 | DATA_TYPE_UINT64
-                | DATA_TYPE_UINT128 => Ok(bytes_to_usize(read_bytes(buffer, &mut offset, size)?)),
+                | DATA_TYPE_UINT128 => Ok(bytes_to_usize(read_bytes(buffer, offset, size)?)),
                 _ => Err(Error::InvalidDataType(data_type)),
             }
         }
@@ -92,8 +92,8 @@ pub(crate) fn read_bool(buffer: &[u8], offset: &mut usize) -> Result<bool, Error
     match data_type {
         DATA_TYPE_BOOL => Ok(size != 0),
         DATA_TYPE_POINTER => {
-            let mut offset = read_pointer(buffer, offset, size)?;
-            let (data_type, size) = read_control(buffer, &mut offset)?;
+            let ref mut offset = read_pointer(buffer, offset, size)?;
+            let (data_type, size) = read_control(buffer, offset)?;
             match data_type {
                 DATA_TYPE_BOOL => Ok(size != 0),
                 _ => Err(Error::InvalidDataType(data_type)),
@@ -110,14 +110,12 @@ pub(crate) fn read_f64(buffer: &[u8], offset: &mut usize) -> Result<f64, Error> 
             bytes_to_usize(read_bytes(buffer, offset, size)?) as u64,
         )),
         DATA_TYPE_POINTER => {
-            let mut offset = read_pointer(buffer, offset, size)?;
-            let (data_type, size) = read_control(buffer, &mut offset)?;
+            let ref mut offset = read_pointer(buffer, offset, size)?;
+            let (data_type, size) = read_control(buffer, offset)?;
             match data_type {
-                DATA_TYPE_FLOAT64 => {
-                    Ok(f64::from_bits(
-                        bytes_to_usize(read_bytes(buffer, &mut offset, size)?) as u64,
-                    ))
-                }
+                DATA_TYPE_FLOAT64 => Ok(f64::from_bits(bytes_to_usize(read_bytes(
+                    buffer, offset, size,
+                )?) as u64)),
                 _ => Err(Error::InvalidDataType(data_type)),
             }
         }
@@ -133,12 +131,12 @@ pub(crate) fn read_str<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<&'a s
             Ok(unsafe { std::str::from_utf8_unchecked(read_bytes(buffer, offset, size)?) })
         }
         DATA_TYPE_POINTER => {
-            let mut offset = read_pointer(buffer, offset, size)?;
-            let (data_type, size) = read_control(buffer, &mut offset)?;
+            let ref mut offset = read_pointer(buffer, offset, size)?;
+            let (data_type, size) = read_control(buffer, offset)?;
             match data_type {
-                DATA_TYPE_STRING => Ok(unsafe {
-                    std::str::from_utf8_unchecked(read_bytes(buffer, &mut offset, size)?)
-                }),
+                DATA_TYPE_STRING => {
+                    Ok(unsafe { std::str::from_utf8_unchecked(read_bytes(buffer, offset, size)?) })
+                }
                 _ => Err(Error::InvalidDataType(data_type)),
             }
         }
@@ -152,12 +150,10 @@ pub(crate) fn read_str<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<&'a s
     match data_type {
         DATA_TYPE_STRING => Ok(std::str::from_utf8(read_bytes(buffer, offset, size)?)?),
         DATA_TYPE_POINTER => {
-            let mut offset = read_pointer(buffer, offset, size)?;
-            let (data_type, size) = read_control(buffer, &mut offset)?;
+            let ref mut offset = read_pointer(buffer, offset, size)?;
+            let (data_type, size) = read_control(buffer, offset)?;
             match data_type {
-                DATA_TYPE_STRING => {
-                    Ok(std::str::from_utf8(read_bytes(buffer, &mut offset, size)?)?)
-                }
+                DATA_TYPE_STRING => Ok(std::str::from_utf8(read_bytes(buffer, offset, size)?)?),
                 _ => Err(Error::InvalidDataType(data_type)),
             }
         }
@@ -190,16 +186,13 @@ pub(crate) fn read_map<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<Map<'
             Ok(Map(map))
         }
         DATA_TYPE_POINTER => {
-            let mut offset = read_pointer(buffer, offset, size)?;
-            let (data_type, size) = read_control(buffer, &mut offset)?;
+            let ref mut offset = read_pointer(buffer, offset, size)?;
+            let (data_type, size) = read_control(buffer, offset)?;
             match data_type {
                 DATA_TYPE_MAP => {
                     let mut map = Vec::with_capacity(size);
                     for _ in 0..size {
-                        map.push((
-                            read_str(buffer, &mut offset)?,
-                            read_str(buffer, &mut offset)?,
-                        ));
+                        map.push((read_str(buffer, offset)?, read_str(buffer, offset)?));
                     }
                     Ok(Map(map))
                 }
@@ -221,13 +214,13 @@ pub(crate) fn read_array<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<Vec
             Ok(array)
         }
         DATA_TYPE_POINTER => {
-            let mut offset = read_pointer(buffer, offset, size)?;
-            let (data_type, size) = read_control(buffer, &mut offset)?;
+            let ref mut offset = read_pointer(buffer, offset, size)?;
+            let (data_type, size) = read_control(buffer, offset)?;
             match data_type {
                 DATA_TYPE_SLICE => {
                     let mut array = Vec::with_capacity(size);
                     for _ in 0..size {
-                        array.push(read_str(buffer, &mut offset)?);
+                        array.push(read_str(buffer, offset)?);
                     }
                     Ok(array)
                 }
