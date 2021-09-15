@@ -51,7 +51,8 @@ jobs:
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         with:
-          command: test --test geoip
+          command: test
+          args: --test geoip
 
   lints:
     name: Lints
