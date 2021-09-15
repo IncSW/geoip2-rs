@@ -65,7 +65,7 @@ fn extract_field(field_ident: Ident, ty: &Type) -> proc_macro2::TokenStream {
                                                                     array
                                                                 }
                                                                 DATA_TYPE_POINTER => {
-                                                                    let ref mut offset = read_pointer(buffer, offset, size)?;
+                                                                    let offset = &mut read_pointer(buffer, offset, size)?;
                                                                     let (data_type, size) = read_control(buffer, offset)?;
                                                                     match data_type {
                                                                         DATA_TYPE_SLICE => {
@@ -213,7 +213,7 @@ pub fn derive_decoder(input: TokenStream) -> TokenStream {
                 match data_type {
                     DATA_TYPE_MAP => self.from_bytes_map(buffer, offset, size),
                     DATA_TYPE_POINTER => {
-                        let ref mut offset = read_pointer(buffer, offset, size)?;
+                        let offset = &mut read_pointer(buffer, offset, size)?;
                         let (data_type, size) = read_control(buffer, offset)?;
                         match data_type {
                             DATA_TYPE_MAP => self.from_bytes_map(buffer, offset, size),
