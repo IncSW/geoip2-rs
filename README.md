@@ -6,7 +6,7 @@
 
 [![Build Status](https://github.com/cristalhq/base64/workflows/build/badge.svg)](https://github.com/IncSW/geoip2/actions)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
-![Downloads](https://img.shields.io/crates/d/geoip2.svg)
+[![Downloads](https://img.shields.io/crates/d/geoip2.svg)](https://crates.io/crates/geoip2)
 
 [![crates.io](https://img.shields.io/crates/v/geoip2?label=latest)](https://crates.io/crates/geoip2)
 [![Documentation](https://docs.rs/geoip2/badge.svg?version=0.1.3)](https://docs.rs/geoip2/0.1.3)
