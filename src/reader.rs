@@ -161,7 +161,12 @@ impl<'a, T> Reader<'a, T> {
     }
 }
 
-#[reader("GeoIP2-Country", "GeoLite2-Country", "DBIP-Country-Lite")]
+#[reader(
+    "GeoIP2-Country",
+    "GeoLite2-Country",
+    "DBIP-Country",
+    "DBIP-Country-Lite"
+)]
 #[derive(Default, Debug)]
 pub struct Country<'a> {
     pub continent: Option<models::Continent<'a>>,

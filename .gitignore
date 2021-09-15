@@ -5,5 +5,8 @@
 /testdata/GeoLite2-ASN.mmdb
 /testdata/GeoLite2-City.mmdb
 /testdata/GeoLite2-Country.mmdb
+/testdata/dbip-city-lite.mmdb
+/testdata/dbip-country-lite.mmdb
+/testdata/dbip-asn-lite.mmdb
 /target
 Cargo.lock
