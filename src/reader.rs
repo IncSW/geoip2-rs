@@ -159,6 +159,10 @@ impl<'a, T> Reader<'a, T> {
         }
         Ok(offset)
     }
+
+    pub fn get_metadata(&self) -> &Metadata<'a> {
+        &self.metadata
+    }
 }
 
 #[reader(
