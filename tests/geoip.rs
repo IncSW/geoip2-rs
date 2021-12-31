@@ -319,5 +319,4 @@ mod tests {
         assert_eq!(metadata.languages, vec!["en"]);
         assert_eq!(metadata.build_epoch, 1609263880);
     }
-
 }
