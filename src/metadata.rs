@@ -10,16 +10,16 @@ const METADATA_START_MARKER: [u8; 14] = [
 ];
 
 #[derive(Default, Debug, Decoder)]
-pub(crate) struct Metadata<'a> {
-    binary_format_major_version: u16,
-    binary_format_minor_version: u16,
-    pub(crate) node_count: u32,
-    pub(crate) record_size: u16,
-    pub(crate) ip_version: u16,
-    pub(crate) database_type: &'a str,
-    languages: Vec<&'a str>,
-    build_epoch: u64,
-    description: Map<'a>,
+pub struct Metadata<'a> {
+    pub binary_format_major_version: u16,
+    pub binary_format_minor_version: u16,
+    pub node_count: u32,
+    pub record_size: u16,
+    pub ip_version: u16,
+    pub database_type: &'a str,
+    pub languages: Vec<&'a str>,
+    pub build_epoch: u64,
+    pub description: Map<'a>,
 }
 
 impl<'a> Metadata<'a> {

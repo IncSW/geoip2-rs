@@ -304,4 +304,20 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn test_metadata() {
+        let buffer = std::fs::read("./testdata/GeoLite2-ASN-Test.mmdb").unwrap();
+        let reader = Reader::<ASN>::from_bytes(&buffer).unwrap();
+        let metadata = reader.get_metadata();
+        assert_eq!(metadata.binary_format_major_version, 2);
+        assert_eq!(metadata.binary_format_minor_version, 0);
+        assert_eq!(metadata.node_count, 1304);
+        assert_eq!(metadata.record_size, 28);
+        assert_eq!(metadata.ip_version, 6);
+        assert_eq!(metadata.database_type, "GeoLite2-ASN");
+        assert_eq!(metadata.languages, vec!["en"]);
+        assert_eq!(metadata.build_epoch, 1609263880);
+    }
+
 }
