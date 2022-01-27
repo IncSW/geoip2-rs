@@ -4,7 +4,7 @@
 		<strong>This library reads MaxMind GeoIP2 databases</strong>
 	</p>
 
-[![Build Status](https://github.com/IncSW/geoip2-rs/workflows/build/badge.svg)](https://github.com/IncSW/geoip2/actions)
+[![Build Status](https://github.com/IncSW/geoip2-rs/workflows/build/badge.svg)](https://github.com/IncSW/geoip2-rs/actions)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
 [![Downloads](https://img.shields.io/crates/d/geoip2.svg)](https://crates.io/crates/geoip2)
 
