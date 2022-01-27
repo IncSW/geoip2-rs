@@ -4,13 +4,13 @@
 		<strong>This library reads MaxMind GeoIP2 databases</strong>
 	</p>
 
-[![Build Status](https://github.com/cristalhq/base64/workflows/build/badge.svg)](https://github.com/IncSW/geoip2/actions)
+[![Build Status](https://github.com/IncSW/geoip2-rs/workflows/build/badge.svg)](https://github.com/IncSW/geoip2/actions)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
 [![Downloads](https://img.shields.io/crates/d/geoip2.svg)](https://crates.io/crates/geoip2)
 
 [![crates.io](https://img.shields.io/crates/v/geoip2?label=latest)](https://crates.io/crates/geoip2)
-[![Documentation](https://docs.rs/geoip2/badge.svg?version=0.1.5)](https://docs.rs/geoip2/0.1.5)
-[![Dependency Status](https://deps.rs/crate/geoip2/0.1.5/status.svg)](https://deps.rs/crate/geoip2/0.1.5)
+[![Documentation](https://docs.rs/geoip2/badge.svg?version=0.1.6)](https://docs.rs/geoip2/0.1.6)
+[![Dependency Status](https://deps.rs/crate/geoip2/0.1.6/status.svg)](https://deps.rs/crate/geoip2/0.1.6)
 
 
 </div>
@@ -19,7 +19,7 @@
 
 ```toml
 [dependencies]
-geoip2 = "0.1.5"
+geoip2 = "0.1.6"
 ```
 
 See [examples/lookup.rs](examples/lookup.rs) for a basic example.
