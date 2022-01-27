@@ -215,6 +215,8 @@ pub struct ISP<'a> {
     pub autonomous_system_organization: Option<&'a str>,
     pub isp: Option<&'a str>,
     pub organization: Option<&'a str>,
+    pub mobile_country_code: Option<&'a str>,
+    pub mobile_network_code: Option<&'a str>,
 }
 
 #[reader("GeoIP2-Connection-Type")]

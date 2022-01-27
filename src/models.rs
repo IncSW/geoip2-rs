@@ -112,6 +112,8 @@ pub struct EnterpriseTraits<'a> {
     pub autonomous_system_organization: Option<&'a str>,
     pub isp: Option<&'a str>,
     pub organization: Option<&'a str>,
+    pub mobile_country_code: Option<&'a str>,
+    pub mobile_network_code: Option<&'a str>,
     pub connection_type: Option<&'a str>,
     pub domain: Option<&'a str>,
     pub user_type: Option<&'a str>,
