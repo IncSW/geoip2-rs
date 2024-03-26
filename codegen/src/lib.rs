@@ -1,8 +1,11 @@
-use proc_macro::{self, TokenStream};
+use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
-    parse_macro_input, AttributeArgs, DeriveInput, Fields, FieldsNamed, GenericArgument, Ident,
-    ItemStruct, Lit, LitStr, NestedMeta, PathArguments, Type,
+    parse::{Parse, ParseStream},
+    parse_macro_input,
+    punctuated::Punctuated,
+    DeriveInput, Fields, FieldsNamed, GenericArgument, Ident, ItemStruct, LitStr, PathArguments,
+    Result, Token, Type,
 };
 
 fn extract_field(field_ident: Ident, ty: &Type) -> proc_macro2::TokenStream {
@@ -244,18 +247,23 @@ pub fn derive_decoder(input: TokenStream) -> TokenStream {
     output.into()
 }
 
+struct Args {
+    types: Vec<LitStr>,
+}
+
+impl Parse for Args {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let vars = Punctuated::<LitStr, Token![,]>::parse_terminated(input)?;
+        Ok(Args {
+            types: vars.into_iter().collect(),
+        })
+    }
+}
+
 #[proc_macro_attribute]
 pub fn reader(metadata: TokenStream, input: TokenStream) -> TokenStream {
-    let types = parse_macro_input!(metadata as AttributeArgs)
-        .iter()
-        .map(|item| {
-            if let NestedMeta::Lit(Lit::Str(lit)) = item {
-                lit.clone()
-            } else {
-                unimplemented!("{:?}", item);
-            }
-        })
-        .collect::<Vec<LitStr>>();
+    let types = parse_macro_input!(metadata as Args).types;
+
     let types_len = types.len();
 
     let input = parse_macro_input!(input as ItemStruct);
