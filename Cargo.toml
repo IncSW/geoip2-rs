@@ -1,6 +1,6 @@
 [package]
 name = "geoip2"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["IncSW <dev@incsw.in>"]
 description = "Library for reading MaxMind DB format used by GeoIP2 and GeoLite2"
 readme = "README.md"
@@ -18,7 +18,7 @@ default = []
 unsafe-str = []
 
 [dependencies]
-geoip2-codegen = "0.1.4"
+geoip2-codegen = "0.1.5"
 
 [workspace]
 members = [".", "codegen"]
@@ -27,7 +27,7 @@ members = [".", "codegen"]
 geoip2-codegen = { path = "codegen" }
 
 [dev-dependencies]
-maxminddb = "0.21.0"
+maxminddb = "0.24.0"
 
 [profile.release]
 lto = "fat"
