@@ -15,11 +15,11 @@ mod tests {
         let city = result.city.unwrap();
         assert_eq!(city.geoname_id, None);
         let names = city.names.unwrap();
-        assert_eq!(names.get("en"), Some("Boston"));
+        assert_eq!(names.get("en"), Some("Medfield"));
 
         let location = result.location.unwrap();
-        assert_eq!(location.latitude, Some(42.3601));
-        assert_eq!(location.longitude, Some(-71.0589));
+        assert_eq!(location.latitude, Some(42.1876));
+        assert_eq!(location.longitude, Some(-71.3065));
 
         let subdivisions = result.subdivisions.unwrap();
         assert_eq!(subdivisions.len(), 1);
@@ -60,7 +60,7 @@ mod tests {
         let result = reader
             .lookup(IpAddr::from_str("66.30.184.198").unwrap())
             .unwrap();
-        assert_eq!(result.autonomous_system_number, Some(7922));
+        assert_eq!(result.autonomous_system_number, Some(7015));
         assert_eq!(
             result.autonomous_system_organization,
             Some("Comcast Cable Communications, LLC")
