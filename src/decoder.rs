@@ -173,6 +173,10 @@ impl<'a> Map<'a> {
         }
         None
     }
+
+    pub fn iter(&'a self) -> std::slice::Iter<'a, (&'a str, &'a str)> {
+        self.0.iter()
+    }
 }
 
 pub(crate) fn read_map<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<Map<'a>, Error> {
