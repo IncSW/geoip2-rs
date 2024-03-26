@@ -174,7 +174,7 @@ impl<'a> Map<'a> {
         None
     }
 
-    pub fn into_iter(&'a self) -> std::slice::Iter<'a, (&'a str, &'a str)> {
+    pub fn iter(&'a self) -> std::slice::Iter<'a, (&'a str, &'a str)> {
         self.0.iter()
     }
 }
