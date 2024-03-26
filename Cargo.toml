@@ -10,7 +10,7 @@ homepage = "https://github.com/IncSW/geoip2-rs"
 documentation = "https://docs.rs/geoip2"
 repository = "https://github.com/IncSW/geoip2-rs"
 license = "MIT"
-edition = "2018"
+edition = "2021"
 exclude = ["testdata"]
 
 [features]
