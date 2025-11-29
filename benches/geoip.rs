@@ -32,7 +32,11 @@ mod tests {
         let reader = maxminddb::Reader::open_readfile("./testdata/GeoIP2-Country.mmdb").unwrap();
         let ip = IpAddr::from_str("81.2.69.142").unwrap();
         b.iter(|| {
-            reader.lookup::<maxminddb::geoip2::Country>(ip).unwrap();
+            reader
+                .lookup(ip)
+                .unwrap()
+                .decode::<maxminddb::geoip2::Country>()
+                .unwrap();
         });
     }
 
@@ -41,7 +45,11 @@ mod tests {
         let reader = maxminddb::Reader::open_readfile("./testdata/GeoIP2-City.mmdb").unwrap();
         let ip = IpAddr::from_str("81.2.69.142").unwrap();
         b.iter(|| {
-            reader.lookup::<maxminddb::geoip2::City>(ip).unwrap();
+            reader
+                .lookup(ip)
+                .unwrap()
+                .decode::<maxminddb::geoip2::City>()
+                .unwrap();
         });
     }
 }
