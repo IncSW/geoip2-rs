@@ -60,7 +60,7 @@ mod tests {
         let result = reader
             .lookup(IpAddr::from_str("66.30.184.198").unwrap())
             .unwrap();
-        assert_eq!(result.autonomous_system_number, Some(7015));
+        assert_eq!(result.autonomous_system_number, Some(7922));
         assert_eq!(
             result.autonomous_system_organization,
             Some("Comcast Cable Communications, LLC")

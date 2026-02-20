@@ -61,15 +61,13 @@ impl<'a, T> Reader<'a, T> {
         Ok(reader)
     }
 
-    fn find_address_in_tree(&self, ip: &[u8]) -> Result<usize, Error> {
-        let bit_count = ip.len() * 8;
-        let mut node: usize = if bit_count == 128 {
-            0
-        } else {
-            self.ip_v4_start
-        };
+    fn find_address_in_tree<const N: usize>(
+        &self,
+        ip: &[u8; N],
+        mut node: usize,
+    ) -> Result<usize, Error> {
         let node_count = self.metadata.node_count as usize;
-        for i in 0..bit_count {
+        for i in 0..(N * 8) {
             if node >= node_count {
                 break;
             }
@@ -135,16 +133,19 @@ impl<'a, T> Reader<'a, T> {
     }
 
     fn lookup_pointer(&self, address: IpAddr) -> Result<usize, Error> {
-        let ip_bytes = match address {
-            IpAddr::V4(ip) => ip.octets().to_vec(),
+        let pointer = match address {
+            IpAddr::V4(ip) => {
+                let octets = ip.octets();
+                self.find_address_in_tree(&octets, self.ip_v4_start)?
+            }
             IpAddr::V6(ip) => {
                 if self.metadata.ip_version == 4 {
                     return Err(Error::IPv4Only);
                 }
-                ip.octets().to_vec()
+                let octets = ip.octets();
+                self.find_address_in_tree(&octets, 0)?
             }
         };
-        let pointer = self.find_address_in_tree(&ip_bytes)?;
         if pointer == 0 {
             return Err(Error::NotFound);
         }

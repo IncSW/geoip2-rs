@@ -9,8 +9,8 @@
 [![Downloads](https://img.shields.io/crates/d/geoip2.svg)](https://crates.io/crates/geoip2)
 
 [![crates.io](https://img.shields.io/crates/v/geoip2?label=latest)](https://crates.io/crates/geoip2)
-[![Documentation](https://docs.rs/geoip2/badge.svg?version=0.1.7)](https://docs.rs/geoip2/0.1.7)
-[![Dependency Status](https://deps.rs/crate/geoip2/0.1.7/status.svg)](https://deps.rs/crate/geoip2/0.1.7)
+[![Documentation](https://docs.rs/geoip2/badge.svg?version=0.1.8)](https://docs.rs/geoip2/0.1.8)
+[![Dependency Status](https://deps.rs/crate/geoip2/0.1.8/status.svg)](https://deps.rs/crate/geoip2/0.1.8)
 
 
 </div>
@@ -19,7 +19,7 @@
 
 ```toml
 [dependencies]
-geoip2 = "0.1.7"
+geoip2 = "0.1.8"
 ```
 
 See [examples/lookup.rs](examples/lookup.rs) for a basic example.
@@ -33,30 +33,35 @@ Place `GeoIP2-Country.mmdb` and `GeoIP2-City.mmdb` in the `testdata` folder, the
 cargo bench
 ```
 
-Tested on paid DB on cargo 1.56.0-nightly, Intel i7-7700, Debian 9.1.
+Tested on paid DB on cargo 1.95.0-nightly, Ryzen 5 3600, Ubuntu 20.04.3 LTS.
 
 ### [IncSW/geoip2-rs](https://github.com/IncSW/geoip2-rs)
 `default`
 ```
-city      2,175 ns/iter (+/- 124)
-country   1,123 ns/iter (+/- 111)
+city      1,782.38 ns/iter (+/- 28.49)
+country     908.45 ns/iter (+/- 7.62)
 ```
 `unsafe-str`
 ```
-city      1,113 ns/iter (+/- 76)
-country     524 ns/iter (+/- 31)
+city        999.06 ns/iter (+/- 8.87)
+country     467.06 ns/iter (+/- 5.79)
 ```
 
-### [oschwald/maxminddb-rust](https://github.com/oschwald/maxminddb-rust).
+### [oschwald/maxminddb-rust](https://github.com/oschwald/maxminddb-rust) 0.27.2.
 `default`
 ```
-city      4,224 ns/iter (+/- 153)
-country   2,270 ns/iter (+/- 158)
+city      1,915.71 ns/iter (+/- 29.17)
+country     993.89 ns/iter (+/- 47.24)
+```
+`simdutf8`
+```
+city      1,870.60 ns/iter (+/- 32.75)
+country     960.99 ns/iter (+/- 22.91)
 ```
 `unsafe-str-decode`
 ```
-city      3,266 ns/iter (+/- 191)
-country   1,802 ns/iter (+/- 75)
+city      1,708.32 ns/iter (+/- 27.23)
+country     875.96 ns/iter (+/- 44.86)
 ```
 
 ## License

@@ -31,7 +31,6 @@ pub(crate) fn read_bytes<'a>(
     Ok(bytes)
 }
 
-#[inline]
 pub(crate) fn read_control(buffer: &[u8], offset: &mut usize) -> Result<(u8, usize), Error> {
     let control_byte = buffer[*offset];
     *offset += 1;
@@ -236,116 +235,14 @@ pub(crate) fn read_array<'a>(buffer: &'a [u8], offset: &mut usize) -> Result<Vec
 }
 
 pub(crate) fn bytes_to_usize(buffer: &[u8]) -> usize {
-    match buffer.len() {
-        1 => buffer[0] as usize,
-        2 => (buffer[0] as usize) << 8 | (buffer[1] as usize),
-        3 => ((buffer[0] as usize) << 8 | (buffer[1] as usize)) << 8 | (buffer[2] as usize),
-        4 => {
-            (((buffer[0] as usize) << 8 | (buffer[1] as usize)) << 8 | (buffer[2] as usize)) << 8
-                | (buffer[3] as usize)
-        }
-        5 => {
-            ((((buffer[0] as usize) << 8 | (buffer[1] as usize)) << 8 | (buffer[2] as usize)) << 8
-                | (buffer[3] as usize))
-                << 8
-                | (buffer[4] as usize)
-        }
-        6 => {
-            (((((buffer[0] as usize) << 8 | (buffer[1] as usize)) << 8 | (buffer[2] as usize))
-                << 8
-                | (buffer[3] as usize))
-                << 8
-                | (buffer[4] as usize))
-                << 8
-                | (buffer[5] as usize)
-        }
-        7 => {
-            ((((((buffer[0] as usize) << 8 | (buffer[1] as usize)) << 8 | (buffer[2] as usize))
-                << 8
-                | (buffer[3] as usize))
-                << 8
-                | (buffer[4] as usize))
-                << 8
-                | (buffer[5] as usize))
-                << 8
-                | (buffer[6] as usize)
-        }
-        8 => {
-            (((((((buffer[0] as usize) << 8 | (buffer[1] as usize)) << 8 | (buffer[2] as usize))
-                << 8
-                | (buffer[3] as usize))
-                << 8
-                | (buffer[4] as usize))
-                << 8
-                | (buffer[5] as usize))
-                << 8
-                | (buffer[6] as usize))
-                << 8
-                | (buffer[7] as usize)
-        }
-        _ => 0,
+    if buffer.len() > 8 {
+        return 0;
     }
+    buffer
+        .iter()
+        .fold(0usize, |acc, &b| (acc << 8) | (b as usize))
 }
 
 fn bytes_to_usize_with_prefix(prefix: usize, buffer: &[u8]) -> usize {
-    match buffer.len() {
-        0 => prefix,
-        1 => prefix << 8 | (buffer[0] as usize),
-        2 => (prefix << 8 | (buffer[0] as usize)) << 8 | (buffer[1] as usize),
-        3 => {
-            ((prefix << 8 | (buffer[0] as usize)) << 8 | (buffer[1] as usize)) << 8
-                | (buffer[2] as usize)
-        }
-        4 => {
-            (((prefix << 8 | (buffer[0] as usize)) << 8 | (buffer[1] as usize)) << 8
-                | (buffer[2] as usize))
-                << 8
-                | (buffer[3] as usize)
-        }
-        5 => {
-            ((((prefix << 8 | (buffer[0] as usize)) << 8 | (buffer[1] as usize)) << 8
-                | (buffer[2] as usize))
-                << 8
-                | (buffer[3] as usize))
-                << 8
-                | (buffer[4] as usize)
-        }
-        6 => {
-            (((((prefix << 8 | (buffer[0] as usize)) << 8 | (buffer[1] as usize)) << 8
-                | (buffer[2] as usize))
-                << 8
-                | (buffer[3] as usize))
-                << 8
-                | (buffer[4] as usize))
-                << 8
-                | (buffer[5] as usize)
-        }
-        7 => {
-            ((((((prefix << 8 | (buffer[0] as usize)) << 8 | (buffer[1] as usize)) << 8
-                | (buffer[2] as usize))
-                << 8
-                | (buffer[3] as usize))
-                << 8
-                | (buffer[4] as usize))
-                << 8
-                | (buffer[5] as usize))
-                << 8
-                | (buffer[6] as usize)
-        }
-        8 => {
-            (((((((prefix << 8 | (buffer[0] as usize)) << 8 | (buffer[1] as usize)) << 8
-                | (buffer[2] as usize))
-                << 8
-                | (buffer[3] as usize))
-                << 8
-                | (buffer[4] as usize))
-                << 8
-                | (buffer[5] as usize))
-                << 8
-                | (buffer[6] as usize))
-                << 8
-                | (buffer[7] as usize)
-        }
-        _ => 0,
-    }
+    (prefix << (buffer.len() * 8)) | bytes_to_usize(buffer)
 }

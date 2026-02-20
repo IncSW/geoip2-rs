@@ -1,6 +1,6 @@
 [package]
 name = "geoip2"
-version = "0.1.7"
+version = "0.1.8"
 authors = ["IncSW <dev@incsw.in>"]
 description = "Library for reading MaxMind DB format used by GeoIP2 and GeoLite2"
 readme = "README.md"
