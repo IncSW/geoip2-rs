@@ -27,7 +27,7 @@ members = [".", "codegen"]
 geoip2-codegen = { path = "codegen" }
 
 [dev-dependencies]
-maxminddb = "0.24.0"
+maxminddb = "0.27.2"
 
 [profile.release]
 lto = "fat"
